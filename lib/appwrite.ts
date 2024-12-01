@@ -6,6 +6,7 @@ import {
   Databases,
   ID,
   Query,
+  Storage,
 } from "react-native-appwrite";
 
 export const appwriteConfig = {
@@ -28,6 +29,7 @@ client
 const account = new Account(client);
 const avatars = new Avatars(client);
 const databases = new Databases(client);
+const storage = new Storage(client);
 
 interface CreateUserProps {
   email: string;
@@ -149,12 +151,82 @@ export async function searchPosts(query: string) {
     throw new Error(error);
   }
 }
-export async function createVideoPost(form) {
+
+interface File {
+  mimeType: string;
+  [key: string]: any;
+}
+
+interface Form {
+  title: string;
+  thumbnail: File;
+  video: File;
+  prompt: string;
+  userId: string;
+}
+
+export async function uploadFile(
+  file: File | null,
+  type: "image" | "video"
+): Promise<string | undefined> {
+  if (!file) return;
+
+  const { mimeType, ...rest } = file;
+  const asset = { type: mimeType, ...rest };
+
+  try {
+    const uploadedFile = await storage.createFile(
+      appwriteConfig.storageId,
+      ID.unique(),
+      asset
+    );
+
+    const fileUrl = await getFilePreview(uploadedFile.$id, type);
+    return fileUrl;
+  } catch (error) {
+    throw new Error((error as Error).message);
+  }
+}
+
+export async function getFilePreview(
+  fileId: string,
+  type: "image" | "video"
+): Promise<string> {
+  let fileUrl;
+  try {
+    if (type === "video") {
+      fileUrl = storage.getFileView(appwriteConfig.storageId, fileId);
+    } else if (type === "image") {
+      fileUrl = storage.getFilePreview(
+        appwriteConfig.storageId,
+        fileId,
+        2000,
+        2000,
+        "top",
+        100
+      );
+    } else {
+      throw new Error("Invalid file type");
+    }
+
+    if (!fileUrl) throw new Error("File URL could not be generated.");
+
+    return fileUrl;
+  } catch (error) {
+    throw new Error((error as Error).message);
+  }
+}
+
+export async function createVideoPost(form: Form): Promise<any> {
   try {
     const [thumbnailUrl, videoUrl] = await Promise.all([
       uploadFile(form.thumbnail, "image"),
       uploadFile(form.video, "video"),
     ]);
+
+    if (!thumbnailUrl || !videoUrl) {
+      throw new Error("File upload failed.");
+    }
 
     const newPost = await databases.createDocument(
       appwriteConfig.databaseId,
@@ -171,6 +243,6 @@ export async function createVideoPost(form) {
 
     return newPost;
   } catch (error) {
-    throw new Error(error);
+    throw new Error((error as Error).message);
   }
 }
