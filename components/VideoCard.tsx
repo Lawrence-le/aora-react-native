@@ -4,28 +4,25 @@ import { ResizeMode, Video } from "expo-av";
 import { icons } from "../constants";
 import { useState } from "react";
 
+interface Creator {
+  username: string;
+  avatar: string;
+}
+
 interface VideoCardProps {
   video: {
     title: string;
     thumbnail: string;
     video: string;
-    creator: {
-      username: string;
-      avatar: string;
-    };
+    creator: Creator;
   };
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({
-  video: {
-    title,
-    thumbnail,
-    video,
-    creator,
-    creator: { username, avatar },
-  },
+  video: { title, thumbnail, video, creator },
 }) => {
   const [play, setPlay] = useState(false);
+  const { username, avatar } = creator;
 
   return (
     <View className="flex flex-col items-center px-4 mb-14">

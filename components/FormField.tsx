@@ -24,7 +24,7 @@ const FormField: React.FC<FormFieldProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   return (
     <View className={`space-y-2 ${otherStyles}`}>
-      <Text className="text-base text-gray-100 font-medium">{title}</Text>
+      <Text className="text-base text-gray-100 font-medium mb-2">{title}</Text>
       <View className="border-2 border-black-500 w-full h-16 px-4 bg-black-100 rounded-2xl items-center flex-row focus:border-secondary  ">
         <TextInput
           className="flex-1 text-white font-semibold"

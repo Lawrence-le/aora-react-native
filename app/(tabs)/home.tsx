@@ -14,7 +14,7 @@ import SearchInput from "@/components/SearchInput";
 import Trending from "@/components/Trending";
 import EmptyState from "@/components/EmptyState";
 import VideoCard from "@/components/VideoCard";
-import { getAllPosts } from "@/lib/appwrite";
+import { getAllPosts, getLatestPosts } from "@/lib/appwrite";
 import useAppwrite from "@/lib/useAppwrite";
 
 // import useAppwrite from "../../lib/useAppwrite";
@@ -43,15 +43,11 @@ interface Item {
 //   };
 // }
 
-const trendingPosts = [
-  { $id: "post-1", id: 1 },
-  { $id: "post-2", id: 2 },
-  { $id: "post-3", id: 3 },
-];
-
 const Home: React.FC = () => {
   const { data: posts, refetch } = useAppwrite(getAllPosts);
   // const { data: posts, refetch } = useAppwrite(getAllPosts) as Item[];
+
+  const { data: latestPosts } = useAppwrite(getLatestPosts);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -90,13 +86,13 @@ const Home: React.FC = () => {
                 />
               </View>
             </View>
-            <SearchInput placeholder="Search for a video topic" />
+            <SearchInput />
             <View className="w-full flex-1 pt-5 ">
               <Text className="text-lg font-pregular text-gray-100 mb-3">
                 Latest Videos
               </Text>
 
-              <Trending posts={trendingPosts} />
+              <Trending posts={latestPosts} />
             </View>
           </View>
         )}
